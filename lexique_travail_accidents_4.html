@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travail et accidents professionnels</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f2f0eb;--surface:#fff;--text:#1c1c1a;--muted:#7a786f;--border:#dedad2;
+  --accent:#2d5a3d;--accent-l:#e6efe9;
+  --danger:#8a4a2a;--danger-l:#f5ebe4;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:32px 20px 60px;}
+.container{max-width:920px;margin:0 auto;}
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:28px;flex-wrap:wrap;}
+.toolbar-title{font-family:'Lora',serif;font-size:22px;font-weight:500;flex:1;min-width:180px;color:var(--text);}
+.btn{padding:7px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:background .15s,border-color .15s;white-space:nowrap;}
+.btn:hover{background:var(--accent-l);border-color:var(--accent);}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.btn.primary:hover{background:#235030;}
+.btn.danger{color:var(--danger);border-color:var(--danger-l);}
+.btn.danger:hover{background:var(--danger-l);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:28px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:0;left:0;width:5px;height:100%;background:var(--accent);border-radius:16px 0 0 16px;}
+.hero-label{font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.hero-title{font-family:'Lora',serif;font-size:26px;font-weight:500;line-height:1.3;margin-bottom:12px;color:var(--text);outline:none;border-bottom:1px solid transparent;transition:border-color .2s;}
+.hero-title:focus{border-color:var(--accent);}
+.hero-text{font-size:14px;line-height:1.8;color:var(--muted);outline:none;border-bottom:1px solid transparent;transition:border-color .2s;}
+.hero-text:focus{border-color:var(--accent);}
+.schema-row{display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.schema-pill{padding:3px 11px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:visible;transition:box-shadow .2s;}
+.card.open{box-shadow:0 4px 24px rgba(0,0,0,.1);}
+.card-header{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid transparent;cursor:pointer;transition:border-color .2s;}
+.card.open .card-header{border-color:var(--border);}
+.card-num{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;}
+.card-title{font-family:'Lora',serif;font-size:15px;font-weight:500;flex:1;outline:none;border-bottom:1px solid transparent;transition:border-color .2s;}
+.card-title:focus{border-color:var(--accent);}
+.card-actions{display:flex;gap:6px;align-items:center;width:44px;justify-content:flex-end;}
+.icon-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--danger-l);background:var(--danger-l);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--danger);transition:background .15s,color .15s;}
+.icon-btn:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
+.card-toggle{font-size:18px;color:var(--muted);transition:transform .25s;flex-shrink:0;line-height:1;width:20px;text-align:center;}
+.card.open .card-toggle{content:'-';}
+.card-body{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.card.open .card-body{max-height:3000px;}
+.sub-list{padding:12px 16px 16px;display:flex;flex-direction:column;gap:6px;}
+.sub-item{border-radius:8px;background:var(--bg);overflow:hidden;}
+.sub-item-header{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;}
+.sub-dot{width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0;}
+.sub-label{flex:1;font-size:13px;line-height:1.4;color:var(--text);outline:none;border-bottom:1px solid transparent;transition:border-color .2s;}
+.sub-label:focus{border-color:var(--accent);}
+.ref-tag{display:inline-block;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;background:#fff3cd;color:#7a5c00;margin-left:5px;vertical-align:middle;}
+.sub-item-btns{display:flex;gap:4px;flex-shrink:0;margin-top:2px;width:44px;justify-content:flex-end;}
+.lex-btn{width:18px;height:18px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s,color .15s;font-weight:500;}
+.sub-item.lex-open .lex-btn{transform:rotate(45deg);color:var(--text);border-color:var(--text);}
+.del-sub-btn{width:18px;height:18px;border-radius:50%;border:none;background:transparent;color:var(--danger);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;transition:color .15s;}
+.del-sub-btn:hover{color:#6a1a0a;}
+.confirm-bubble{position:fixed;z-index:300;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:180px;animation:fadeIn .15s ease;}
+@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.confirm-bubble p{font-size:12px;color:var(--text);margin-bottom:10px;line-height:1.4;}
+.confirm-bubble-btns{display:flex;gap:6px;justify-content:flex-end;}
+.confirm-bubble-btns button{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:background .15s;}
+.confirm-bubble-btns button.yes{background:var(--danger-l);color:var(--danger);border-color:var(--danger-l);}
+.confirm-bubble-btns button.yes:hover{background:var(--danger);color:#fff;}
+.confirm-bubble-btns button.no:hover{background:var(--bg);}
+.lex-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.sub-item.lex-open .lex-body{max-height:400px;}
+.lex-content{padding:8px 10px 10px 22px;font-size:12px;line-height:1.7;color:var(--muted);border-top:1px solid var(--border);outline:none;transition:background .15s;}
+.lex-content:focus{background:var(--accent-l);}
+.add-item-row{display:flex;gap:6px;padding:4px 16px 12px;}
+.add-item-input{flex:1;border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);background:var(--surface);outline:none;}
+.add-item-input:focus{border-color:var(--accent);}
+.add-item-btn{padding:6px 12px;border-radius:7px;border:1px solid var(--accent);background:var(--accent-l);color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.add-item-btn:hover{background:var(--accent);color:#fff;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:16px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.modal h3{font-family:'Lora',serif;font-size:18px;margin-bottom:16px;}
+.modal input{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--bg);outline:none;margin-bottom:10px;}
+.modal input:focus{border-color:var(--accent);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+@media print{
+  .toolbar,.add-item-row,.card-actions,.sub-item-btns{display:none!important;}
+  .card-body{max-height:none!important;}
+  .lex-body{max-height:none!important;}
+  body{background:#fff;padding:16px;}
+  .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="toolbar">
+    <div class="toolbar-title">Lexique de cours</div>
+    <button class="btn primary" onclick="openAddTheme()">+ Nouveau thème</button>
+    <button class="btn" onclick="window.print()">Exporter PDF</button>
+    <button class="btn danger" onclick="clearAll()">Réinitialiser</button>
+  </div>
+  <div class="hero">
+    <div class="hero-label">Cours — Organisation de l'action sociale</div>
+    <div class="hero-title" id="hero-title" contenteditable="true" spellcheck="false">Travail et accidents professionnels</div>
+    <div class="hero-text" id="hero-desc" contenteditable="true" spellcheck="false">Le travail est, selon Robert Castel (1991), le premier pilier de l'intégration sociale. Lorsqu'un accident du travail ou une maladie professionnelle survient, il ne s'agit pas d'un simple incident individuel : c'est un phénomène social observable qui, une fois nommé et reconnu collectivement, devient un problème social appelant des réponses sociales — lois, dispositifs, institutions. Ce schéma en trois temps structure la dynamique de toute politique sociale, inspiré de Fehlmann et al.</div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);">Source historique : <a href="https://www.histoiredelasecuritesociale.ch/risques/travail-et-accidents-professionnels" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px;">histoiredelasecuritesociale.ch</a> (OFAS, 2020)</div>
+    <div class="schema-row" id="schema-row"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal-overlay" id="modal-add" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Nouveau thème</h3>
+    <input type="text" id="new-theme-title" placeholder="Titre du thème..." onkeydown="if(event.key==='Enter')confirmAddTheme()">
+    <div class="modal-btns">
+      <button class="btn" onclick="document.getElementById('modal-add').classList.remove('open')">Annuler</button>
+      <button class="btn primary" onclick="confirmAddTheme()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS=[
+  {acc:'#2d5a3d',light:'#e6efe9'},
+  {acc:'#8a4a2a',light:'#f5ebe4'},
+  {acc:'#2a4f72',light:'#e4edf5'},
+  {acc:'#6a3a8a',light:'#ede6f5'},
+  {acc:'#4a6a2a',light:'#eaf0e2'},
+  {acc:'#2a6a6a',light:'#e2f0f0'},
+  {acc:'#6a2a4a',light:'#f0e2ea'},
+];
+
+const DEFAULT = {
+  heroTitle:'Travail et accidents professionnels',
+  heroDesc:"Le travail est, selon Robert Castel (1991), le premier pilier de l'intégration sociale. Lorsqu'un accident du travail ou une maladie professionnelle survient, il ne s'agit pas d'un simple incident individuel : c'est un phénomène social observable qui, une fois nommé et reconnu collectivement, devient un problème social appelant des réponses sociales — lois, dispositifs, institutions. Ce schéma en trois temps structure la dynamique de toute politique sociale, inspiré de Fehlmann et al.",
+  themes:[
+    {title:'Phénomène social',open:false,items:[
+      {
+        label:'Accidents du travail (AT)',
+        lex:"Faits observables survenus pendant ou à l'occasion du travail : chutes, écrasements, coupures, accidents de trajet. La SUVA recense ces accidents depuis 1918. Aujourd'hui, on compte environ sept accidents professionnels pour cent assurés. La probabilité d'un AT a diminué d'un tiers depuis le début du XXe siècle, principalement grâce à l'essor du secteur tertiaire et aux politiques de prévention. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Maladies professionnelles (MP)',
+        lex:"Pathologies causées ou aggravées par les conditions de travail : troubles musculo-squelettiques (TMS), maladies liées à l'amiante, atteintes auditives, intoxications. Elles sont souvent plus difficiles à diagnostiquer que les accidents en raison de leur évolution lente. Certaines ont mis des décennies à être reconnues : la silicose, par exemple, n'a été ajoutée à la liste des maladies professionnelles qu'en 1937. En 1960, la SUVA a introduit des valeurs limites d'exposition aux postes de travail. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Risques psychosociaux et burn-out',
+        lex:"Catégorie en expansion qui regroupe les atteintes à la santé liées à une ambiance de travail défavorable ou à une mauvaise organisation : stress, surmenage, maux de dos, épuisement professionnel. Ces risques ne sont pas encore couverts par l'assurance-accidents. Depuis 2014, le SECO invite les inspections cantonales du travail à porter leur attention sur leur prévention. C'est un exemple concret d'évolution de la perception du phénomène. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Surexposition des travailleurs précaires',
+        lex:"Les travailleurs en CDD, intérim ou à temps partiel subi sont statistiquement surreprésentés dans les accidents du travail. La précarité du contrat limite l'accès à la formation sécurité et réduit la capacité à signaler les risques. Historiquement, certaines catégories ont longtemps été exclues de la couverture : l'assurance-accidents obligatoire n'a été étendue aux ouvriers agricoles qu'en 1984. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Désaffiliation sociale post-accident (Castel 1991)',
+        lex:"Selon Castel (1991), le travail et les réseaux de sociabilité sont les deux piliers de l'intégration sociale. Un accident professionnel attaque directement le premier pilier. S'il entraîne un arrêt prolongé, il fragilise aussi le second : isolement, honte, retrait social. C'est la désaffiliation sociale. Les accidents survenus pendant les loisirs connaissent quant à eux une hausse constante : en 2013, on comptait près de treize cas pour cent assurés. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+    ]},
+    {title:'Problème social',open:false,items:[
+      {
+        label:'Première prise de conscience (personne concernée, proches, professionnels)',
+        lex:"Premier niveau de reconnaissance, microsocial. La personne accidentée, son médecin, son assistant social ou ses proches réalisent que la situation dépasse le seul incident physique. Historiquement, ce sont d'abord les sociétés philanthropiques et les associations de travailleurs qui ont joué ce rôle au XIXe siècle, bien avant que l'État ne s'en saisisse. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Première problématisation',
+        lex:"Le passage du fait brut à l'interprétation : \"je me suis blessé au travail\" devient \"cet accident révèle des conditions dangereuses qui touchent d'autres.\" Dès la fin du XVIIIe siècle, avec les premières usines, de nouvelles formes de travail engendrent des risques jusqu'alors inconnus — et il faudra des décennies pour que ces risques soient nommés et reconnus collectivement. C'est une étape intermédiaire entre le phénomène et sa reconnaissance collective.",
+        lexOpen:false
+      },
+      {
+        label:'Prise de conscience publique et politique (médias, partis)',
+        lex:"Le phénomène monte en visibilité : reportages, chiffres SUVA relayés dans les médias, témoignages. Les syndicats — héritiers des associations de travailleurs du XIXe siècle — transforment des cas individuels en revendications collectives. Les partis politiques s'en saisissent pour proposer des modifications législatives. En Suisse, ce processus a conduit à la loi sur les fabriques de 1877, première grande réglementation étatique du risque professionnel. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Définition comme problème de politique sociale',
+        lex:"Étape décisive : le phénomène est officiellement reconnu comme relevant d'une intervention de l'État. En Suisse, ce basculement s'est opéré progressivement : loi sur la responsabilité civile (1881), loi sur l'assurance-maladie et accidents (1912), création de la SUVA (1918). Chaque étape représente une décision politique qui redistribue les responsabilités entre employeurs, travailleurs et État. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Dualité bon / mauvais accidenté (Castel 1985)',
+        lex:"Castel (1985) décrit la distinction médiévale entre bons pauvres (invalides, méritants) et mauvais pauvres (jugés responsables). Appliquée aux accidents du travail : le bon accidenté est victime d'un contexte dangereux. Le mauvais accidenté est perçu comme imprudent, voire fraudeur. Cette représentation influence les décisions institutionnelles et se retrouve dans les débats sur la couverture des risques psychosociaux, encore contestés aujourd'hui.",
+        lexOpen:false
+      },
+    ]},
+    {title:'Réponse sociale',open:false,items:[
+      {
+        label:'LAA — loi fédérale sur l\'assurance-accidents (1984)',
+        lex:"La loi sur l'assurance-maladie et accidents entre en vigueur en 1912. En 1918, sa mise en œuvre est confiée à la SUVA. En 1984, la LAA étend l'assurance-accidents obligatoire à tous les salariés suisses, y compris les ouvriers agricoles. Prestations : frais médicaux, indemnités journalières (80% du salaire), rentes invalidité, rentes de survivants. C'est la réponse centrale et directe au phénomène des AT/MP en Suisse. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'AI (assurance invalidité)',
+        lex:"Relais de la LAA quand l'incapacité de travail est durable. L'AI finance des mesures de réadaptation médicale et professionnelle avant d'allouer une rente. Priorité donnée à la réinsertion — la rente reste le dernier recours. L'objectif est de reconstruire le lien professionnel, premier pilier de l'intégration sociale selon Castel.",
+        lexOpen:false
+      },
+      {
+        label:'Assurance-chômage',
+        lex:"Troisième filet de sécurité quand l'accident entraîne une perte d'emploi. LAA, AI et chômage forment un dispositif articulé autour du risque professionnel. En pratique, le passage d'une assurance à l'autre peut être long et semé d'obstacles administratifs pour la personne concernée.",
+        lexOpen:false
+      },
+      {
+        label:'Réadaptation professionnelle',
+        lex:"Ensemble des mesures visant à permettre à la personne accidentée de retrouver une activité professionnelle adaptée. Orientation, formation, placement. Financée principalement par l'AI. La SUVA joue aussi un rôle de réadaptation depuis sa création. Les données SUVA montrent que les entreprises ayant mis en place un programme de prévention enregistrent des taux d'accidents plus faibles. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'EPI / La Pallanterie / ateliers protégés',
+        lex:"Institutions qui accueillent des personnes dont la capacité de travail est durablement réduite. Elles proposent une mise en situation professionnelle réelle, encadrée par des MSP. C'est là que s'articulent réponse institutionnelle et accompagnement individuel au quotidien. Le MSP y joue un rôle central : créer les conditions du développement des compétences professionnelles du bénéficiaire.",
+        lexOpen:false
+      },
+      {
+        label:'Disparités cantonales',
+        lex:"Les réponses sociales varient selon les cantons : prestations complémentaires, offre de réadaptation, seuils d'accès à l'aide sociale. Les inspections cantonales du travail contrôlent le respect de la LAA, sous la coordination de l'Inspection fédérale du travail. Depuis 2014, le SECO leur demande d'intégrer la prévention des risques psychosociaux dans leurs contrôles. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+    ]},
+    {title:'Acteurs clés',open:false,items:[
+      {
+        label:'Personnes concernées et proches',
+        lex:"Premiers acteurs de la problématisation. Ce sont eux qui vivent le phénomène de l'intérieur. Leur capacité à nommer ce qui leur arrive et à le porter dans l'espace social est une condition de la reconnaissance du problème. Historiquement, les travailleurs et leurs familles ont été les premiers à dénoncer les conditions dangereuses dans les usines du XIXe siècle. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'SUVA',
+        lex:"Créée en 1918, la SUVA est à la fois assureur, préventeur et réadaptateur. Elle a une composition corporatiste : représentants des employeurs, des employés et des autorités publiques. Elle finance la recherche sur les risques professionnels, mène des campagnes de prévention nationales et produit les statistiques qui documentent le phénomène. Son modèle s'inspire des coopératives professionnelles allemandes créées sous Bismarck dans les années 1880. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Syndicats (USS, SGB)',
+        lex:"Héritiers des associations de travailleurs du XIXe siècle, les syndicats défendent les travailleurs accidentés et exercent une pression politique pour améliorer les protections légales. Ils ont joué un rôle clé dans l'élaboration des premières lois sur la protection du travail en Suisse, notamment la loi sur les fabriques de 1877. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Partis politiques et médias',
+        lex:"Ils assurent la visibilité publique du phénomène et pèsent sur sa définition comme problème de politique sociale. Les autorités politiques suisses s'intéressent à la protection des travailleurs dès les années 1860, sous la pression des risques du travail industriel. Les médias rendent les chiffres accessibles et donnent la parole aux concernés. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'Chercheurs en sciences sociales',
+        lex:"Ils formulent des hypothèses pour comprendre le phénomène et ouvrir des pistes d'action. Castel est une référence centrale dans ce cours. La SUVA finance aussi la recherche sur les risques professionnels, notamment sur les risques psychosociaux émergents. Question clé posée par le cours : d'où vient la recherche ? Qui la finance ? Ces questions conditionnent les angles d'analyse retenus.",
+        lexOpen:false
+      },
+      {
+        label:'MSP et travailleurs sociaux',
+        lex:"Positionnés à l'articulation entre la réponse institutionnelle (LAA, AI, EPI) et l'accompagnement individuel. Le MSP crée les conditions du développement des compétences professionnelles du bénéficiaire, en tenant compte de ses limites et de ses ressources. Il contribue à reconstruire le lien professionnel — premier pilier de l'intégration sociale selon Castel (1991).",
+        lexOpen:false
+      },
+    ]},
+    {title:"Dynamique d'évolution",open:false,items:[
+      {
+        label:'Le phénomène évolue',
+        lex:"Les formes d'accidents et de maladies professionnelles changent avec les mutations du travail. Historiquement : passage du risque industriel (XIXe) au risque de service (XXe), puis émergence des risques psychosociaux (XXIe). Les accidents de loisirs ont doublé en cent ans avec la motorisation et la réduction du temps de travail. Ce que l'on mesure aujourd'hui n'est pas ce que l'on mesurait il y a trente ans. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:'La perception du problème évolue',
+        lex:"Ce qui est reconnu comme problème social change avec le temps et les rapports de force. Le burn-out et les risques psychosociaux ne sont pas encore couverts par l'assurance-accidents. La silicose a mis des décennies à être reconnue (ajoutée à la liste des MP en 1937 seulement). Le travail des femmes et le travail domestique ont longtemps été exclus des débats sur la prévention des accidents. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:"Les réponses s'adaptent",
+        lex:"Les dispositifs légaux et institutionnels évoluent en réponse aux nouvelles formes du phénomène. En Suisse : loi sur les fabriques (1877), LAMA (1912), SUVA (1918), extension à l'agriculture (1984), intégration des risques psychosociaux dans les contrôles cantonaux (depuis 2014). Chaque étape représente une reconfiguration de l'organisation de l'action sociale. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+      {
+        label:"Nouvelle critique de l'action sociale (Fehlmann et al.)",
+        lex:"Inspiré de Fehlmann et al. : chaque nouvelle réponse sociale génère de nouvelles prises de conscience et de nouvelles critiques. Les organisations patronales ont par exemple appelé à une déréglementation du droit du travail dans les années 1990, ce qui a conduit à la révision de la loi sur le travail en 1998. C'est une dynamique circulaire et continue — il n'y a pas d'état final stable. (Source : histoiredelasecuritesociale.ch)",
+        lexOpen:false
+      },
+    ]},
+  ]
+};
+
+let state = JSON.parse(JSON.stringify(DEFAULT));
+
+function loadState() {
+  render();
+}
+
+function save() {}
+
+function render() {
+  document.getElementById('hero-title').innerText = state.heroTitle;
+  document.getElementById('hero-desc').innerText = state.heroDesc;
+  const row = document.getElementById('schema-row');
+  row.innerHTML = '';
+  state.themes.forEach((t, i) => {
+    if (i > 0) { const a = document.createElement('span'); a.style.cssText='color:#7a786f;font-size:13px;'; a.textContent='→'; row.appendChild(a); }
+    const p = document.createElement('span');
+    p.className = 'schema-pill';
+    const c = COLORS[i % COLORS.length];
+    p.style.cssText = `background:${c.light};color:${c.acc};border-color:${c.acc};`;
+    p.textContent = t.title;
+    row.appendChild(p);
+  });
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  state.themes.forEach((theme, ti) => buildCard(theme, ti, grid));
+}
+
+function buildCard(theme, ti, grid) {
+  const c = COLORS[ti % COLORS.length];
+  const card = document.createElement('div');
+  card.className = 'card' + (theme.open ? ' open' : '');
+  card.id = `card-${ti}`;
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  header.innerHTML = `
+    <div class="card-num" style="background:${c.light};color:${c.acc};">${ti+1}</div>
+    <div class="card-title" contenteditable="true" spellcheck="false" style="color:${c.acc};">${theme.title}</div>
+    <div class="card-actions"><div class="icon-btn" title="Supprimer">✕</div></div>
+    <div class="card-toggle">${theme.open ? '−' : '+'}</div>
+  `;
+  header.querySelector('.card-title').addEventListener('blur', (e) => { state.themes[ti].title = e.target.innerText.trim(); save(); renderSchema(); });
+  header.querySelector('.icon-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showConfirm(e.target, `Supprimer le thème ?`, () => {
+      state.themes.splice(ti, 1); save(); render();
+    });
+  });
+  header.addEventListener('click', (e) => {
+    if (e.target.closest('.card-actions') || e.target.contentEditable === 'true') return;
+    state.themes[ti].open = !state.themes[ti].open;
+    card.classList.toggle('open', state.themes[ti].open);
+    header.querySelector('.card-toggle').textContent = state.themes[ti].open ? '−' : '+';
+    save();
+  });
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  const sl = document.createElement('div');
+  sl.className = 'sub-list';
+  (theme.items || []).forEach((item, ii) => buildSubItem(item, ti, ii, sl, c));
+  const addRow = document.createElement('div');
+  addRow.className = 'add-item-row';
+  addRow.innerHTML = `<input class="add-item-input" placeholder="Nouveau sous-item..." id="ni-${ti}"><button class="add-item-btn">Ajouter</button>`;
+  addRow.querySelector('input').addEventListener('keydown', (e) => { if (e.key==='Enter') doAddItem(ti); });
+  addRow.querySelector('button').addEventListener('click', () => doAddItem(ti));
+  body.appendChild(sl); body.appendChild(addRow);
+  card.appendChild(header); card.appendChild(body);
+  grid.appendChild(card);
+}
+
+function buildSubItem(item, ti, ii, container, c) {
+  const div = document.createElement('div');
+  div.className = 'sub-item' + (item.lexOpen ? ' lex-open' : '');
+  const hdr = document.createElement('div');
+  hdr.className = 'sub-item-header';
+  hdr.innerHTML = `
+    <div class="sub-dot" style="background:${c.acc};"></div>
+    <span class="sub-label" contenteditable="true" spellcheck="false">${item.label}</span>
+    <div class="sub-item-btns">
+      <div class="lex-btn">${item.lexOpen ? '−' : '+'}</div>
+      <div class="del-sub-btn">✕</div>
+    </div>
+  `;
+  hdr.querySelector('.sub-label').addEventListener('blur', (e) => { state.themes[ti].items[ii].label = e.target.innerText.trim(); save(); });
+  hdr.querySelector('.lex-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    state.themes[ti].items[ii].lexOpen = !state.themes[ti].items[ii].lexOpen;
+    div.classList.toggle('lex-open', state.themes[ti].items[ii].lexOpen);
+    hdr.querySelector('.lex-btn').textContent = state.themes[ti].items[ii].lexOpen ? '−' : '+';
+    save();
+  });
+  hdr.querySelector('.del-sub-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showConfirm(e.target, `Supprimer cet item ?`, () => {
+      state.themes[ti].items.splice(ii, 1); save(); render();
+    });
+  });
+  const lb = document.createElement('div');
+  lb.className = 'lex-body';
+  const lc = document.createElement('div');
+  lc.className = 'lex-content';
+  lc.contentEditable = 'true';
+  lc.spellcheck = false;
+  lc.innerText = item.lex || 'Clique pour ajouter une définition...';
+  lc.addEventListener('blur', (e) => { state.themes[ti].items[ii].lex = e.target.innerText.trim(); save(); });
+  lb.appendChild(lc);
+  div.appendChild(hdr); div.appendChild(lb);
+  container.appendChild(div);
+}
+
+function doAddItem(ti) {
+  const inp = document.getElementById(`ni-${ti}`);
+  const val = inp.value.trim();
+  if (!val) return;
+  state.themes[ti].items.push({ label: val, lex: '', lexOpen: false });
+  state.themes[ti].open = true;
+  inp.value = ''; save(); render();
+}
+
+function renderSchema() {
+  const row = document.getElementById('schema-row');
+  row.innerHTML = '';
+  state.themes.forEach((t, i) => {
+    if (i > 0) { const a = document.createElement('span'); a.style.cssText='color:#7a786f;font-size:13px;'; a.textContent='→'; row.appendChild(a); }
+    const p = document.createElement('span');
+    p.className = 'schema-pill';
+    const c = COLORS[i % COLORS.length];
+    p.style.cssText = `background:${c.light};color:${c.acc};border-color:${c.acc};`;
+    p.textContent = t.title; row.appendChild(p);
+  });
+}
+
+function openAddTheme() {
+  document.getElementById('new-theme-title').value = '';
+  document.getElementById('modal-add').classList.add('open');
+  setTimeout(() => document.getElementById('new-theme-title').focus(), 100);
+}
+
+function confirmAddTheme() {
+  const t = document.getElementById('new-theme-title').value.trim();
+  if (!t) return;
+  state.themes.push({ title: t, items: [], open: false });
+  save(); render();
+  document.getElementById('modal-add').classList.remove('open');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'modal-add') document.getElementById('modal-add').classList.remove('open');
+}
+
+function clearAll() {
+  const btn = document.querySelector('.btn.danger');
+  showConfirm(btn, "Remettre le contenu d'origine ?", () => {
+    state = JSON.parse(JSON.stringify(DEFAULT));
+    render();
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.contentEditable === 'true' && !e.target.classList.contains('lex-content') && !e.target.classList.contains('hero-text')) {
+    e.preventDefault(); e.target.blur();
+  }
+});
+
+document.addEventListener('focusout', (e) => {
+  if (e.target.id === 'hero-title' || e.target.id === 'hero-desc') save();
+});
+
+function showConfirm(anchor, message, onYes) {
+  document.querySelectorAll('.confirm-bubble').forEach(b => b.remove());
+  const bubble = document.createElement('div');
+  bubble.className = 'confirm-bubble';
+  bubble.innerHTML = `
+    <p>${message}</p>
+    <div class="confirm-bubble-btns">
+      <button class="no">Annuler</button>
+      <button class="yes">Supprimer</button>
+    </div>
+  `;
+  document.body.appendChild(bubble);
+  const r = anchor.getBoundingClientRect();
+  let top = r.bottom + 6 + window.scrollY;
+  let left = r.left + window.scrollX;
+  bubble.style.top = top + 'px';
+  bubble.style.left = left + 'px';
+  const bw = bubble.offsetWidth;
+  if (left + bw > window.innerWidth - 12) {
+    bubble.style.left = (window.innerWidth - bw - 12) + 'px';
+  }
+  bubble.querySelector('.yes').addEventListener('click', () => { bubble.remove(); onYes(); });
+  bubble.querySelector('.no').addEventListener('click', () => bubble.remove());
+  setTimeout(() => document.addEventListener('click', function handler(e) {
+    if (!bubble.contains(e.target)) { bubble.remove(); document.removeEventListener('click', handler); }
+  }), 10);
+}
+
+loadState();
+</script>
+</body>
+</html>
