@@ -553,10 +553,10 @@ function buildCard(theme, ti, grid) {
   header.innerHTML = `
     <div class="card-num" style="background:${c.light};color:${c.acc};">${ti+1}</div>
     <div class="card-title" contenteditable="true" spellcheck="false" style="color:${c.acc};">${theme.title}</div>
-    <div class="card-progress">
+    ${!state.quizEnabled ? `<div class="card-progress">
       <span class="card-progress-text">${masteredCount}/${totalCount}</span>
       <div class="card-progress-bar"><div class="card-progress-fill" style="width:${pct}%;background:${c.acc};"></div></div>
-    </div>
+    </div>` : ''}
     <div class="card-actions"><div class="icon-btn" title="Supprimer">✕</div></div>
     <div class="card-toggle">${theme.open ? '−' : '+'}</div>
   `;
