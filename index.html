@@ -153,7 +153,8 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
 .quiz-done{text-align:center;padding:10px 0 20px;}
 .quiz-done-emoji{font-size:38px;margin-bottom:14px;}
 .quiz-done-title{font-family:'Lora',serif;font-size:19px;margin-bottom:8px;}
-.quiz-done-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.quiz-done-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+.quiz-stats{background:var(--bg);border-radius:10px;padding:16px;margin-bottom:24px;font-size:13px;text-align:left;display:inline-block;min-width:200px;}
 
 /* ---- Improved animations ---- */
 .card-body{transition:max-height .35s cubic-bezier(.4,0,.2,1) !important;}
@@ -203,6 +204,16 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
     <div class="modal-btns">
       <button class="btn" onclick="document.getElementById('modal-add').classList.remove('open')">Annuler</button>
       <button class="btn primary" onclick="confirmAddTheme()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-quiz-theme" onclick="if(event.target.id==='modal-quiz-theme')closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Choisir un thème</h3>
+    <div id="quiz-theme-buttons"></div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Annuler</button>
     </div>
   </div>
 </div>
@@ -424,6 +435,7 @@ function updateCardProgress(ti) {
 
 let quizQueue = [];
 let quizIndex = 0;
+let quizStats = { correct: 0, toReview: 0 };
 
 function toggleQuiz() {
   state.quizEnabled = !state.quizEnabled;
@@ -434,23 +446,57 @@ function toggleQuiz() {
 
 function openQuiz() {
   if (!state.quizEnabled) return;
+  quizStats = { correct: 0, toReview: 0 };
+
+  // Show theme selection modal
+  const themeOptions = state.themes.map((t, i) => `<button class="btn" style="display:block;width:100%;text-align:left;margin-bottom:8px;" onclick="startQuizForTheme(${i})">• ${t.title}</button>`).join('');
+  const allThemesBtn = `<button class="btn" style="display:block;width:100%;text-align:left;margin-bottom:8px;font-weight:bold;" onclick="startQuizForTheme(-1)">• Tous les thèmes</button>`;
+
+  document.getElementById('quiz-theme-buttons').innerHTML = allThemesBtn + themeOptions;
+  document.getElementById('modal-quiz-theme').classList.add('open');
+}
+
+function startQuizForTheme(themeIndex) {
+  closeModal();
   quizQueue = [];
-  state.themes.forEach((theme, ti) => {
-    (theme.items || []).forEach((item, ii) => {
-      if (!item.mastered) quizQueue.push({ ti, ii, theme: theme.title, label: item.label, lex: item.lex || '' });
-    });
-  });
-  if (quizQueue.length === 0) {
+
+  if (themeIndex === -1) {
+    // All themes
     state.themes.forEach((theme, ti) => {
       (theme.items || []).forEach((item, ii) => {
-        quizQueue.push({ ti, ii, theme: theme.title, label: item.label, lex: item.lex || '' });
+        if (!item.mastered) quizQueue.push({ ti, ii, theme: theme.title, label: item.label, lex: item.lex || '' });
       });
     });
+  } else {
+    // Specific theme
+    const theme = state.themes[themeIndex];
+    (theme.items || []).forEach((item, ii) => {
+      if (!item.mastered) quizQueue.push({ ti: themeIndex, ii, theme: theme.title, label: item.label, lex: item.lex || '' });
+    });
   }
+
+  // If no non-mastered items, show all items
+  if (quizQueue.length === 0) {
+    if (themeIndex === -1) {
+      state.themes.forEach((theme, ti) => {
+        (theme.items || []).forEach((item, ii) => {
+          quizQueue.push({ ti, ii, theme: theme.title, label: item.label, lex: item.lex || '' });
+        });
+      });
+    } else {
+      const theme = state.themes[themeIndex];
+      (theme.items || []).forEach((item, ii) => {
+        quizQueue.push({ ti: themeIndex, ii, theme: theme.title, label: item.label, lex: item.lex || '' });
+      });
+    }
+  }
+
+  // Shuffle
   for (let i = quizQueue.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [quizQueue[i], quizQueue[j]] = [quizQueue[j], quizQueue[i]];
   }
+
   quizIndex = 0;
   document.getElementById('quiz-overlay').classList.add('open');
   renderQuizCard();
@@ -459,7 +505,9 @@ function openQuiz() {
 function renderQuizCard() {
   const inner = document.getElementById('quiz-card-inner');
   if (quizIndex >= quizQueue.length) {
-    inner.innerHTML = '<div class="quiz-done"><div class="quiz-done-emoji">🎉</div><div class="quiz-done-title">Quiz terminé !</div><div class="quiz-done-sub">Tu as parcouru tous les termes.</div><button class="btn primary" onclick="closeQuiz()">Fermer</button></div>';
+    const total = quizStats.correct + quizStats.toReview;
+    const pct = total > 0 ? Math.round((quizStats.correct / total) * 100) : 0;
+    inner.innerHTML = '<div class="quiz-done"><div class="quiz-done-emoji">🎉</div><div class="quiz-done-title">Quiz terminé !</div><div class="quiz-done-sub">Tu as parcouru tous les termes.</div><div class="quiz-stats"><div>✓ Maîtrisés: <strong>' + quizStats.correct + '</strong></div><div>↺ À revoir: <strong>' + quizStats.toReview + '</strong></div><div style="margin-top:10px;font-size:14px;">Taux de réussite: <strong>' + pct + '%</strong></div></div><button class="btn primary" onclick="closeQuiz()">Fermer</button></div>';
     return;
   }
   const q = quizQueue[quizIndex];
@@ -490,12 +538,14 @@ function revealDef() {
 function quizMarkMastered() {
   const q = quizQueue[quizIndex];
   state.themes[q.ti].items[q.ii].mastered = true;
+  quizStats.correct++;
   save();
   quizIndex++;
   renderQuizCard();
 }
 
 function quizSkip() {
+  quizStats.toReview++;
   quizIndex++;
   renderQuizCard();
 }
@@ -703,7 +753,8 @@ function confirmAddTheme() {
 }
 
 function closeModal(e) {
-  if (e.target.id === 'modal-add') document.getElementById('modal-add').classList.remove('open');
+  if (!e || e.target.id === 'modal-add') document.getElementById('modal-add').classList.remove('open');
+  if (!e || e.target.id === 'modal-quiz-theme') document.getElementById('modal-quiz-theme').classList.remove('open');
 }
 
 function resetProgress() {
