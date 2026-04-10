@@ -795,6 +795,18 @@ const REFERENCE_LINKS = {
 function showReferences(label, lex) {
   const refs = [];
 
+  // Extract sources (Source: ...)
+  const sources = [];
+  const sourceMatch = lex.match(/\(Source\s*:\s*([^)]+)\)/gi);
+  if (sourceMatch) {
+    sourceMatch.forEach(match => {
+      const source = match.replace(/\(Source\s*:\s*|[)]/gi, '').trim();
+      if (source && !sources.includes(source)) {
+        sources.push(source);
+      }
+    });
+  }
+
   // Extract dates/years (4 digits)
   const dateMatches = lex.match(/\b(19|20)\d{2}\b/g);
   if (dateMatches) {
@@ -802,19 +814,19 @@ function showReferences(label, lex) {
     refs.push({ type: 'dates', icon: '📅', title: 'Périodes citées', items: dates });
   }
 
-  // Extract proper nouns and organizations (capitalized words, excluding first word)
-  const words = lex.split(/[\s,.:;()]+/).filter(w => w.length > 2);
+  // Extract proper nouns and organizations
   const properNouns = new Set();
-  words.forEach(word => {
-    if (/^[A-Z][a-z]+(\s[A-Z][a-z]+)*$/.test(word) && !['Le', 'La', 'Les', 'Un', 'Une', 'Des'].includes(word)) {
-      properNouns.add(word);
-    }
-  });
-  // Also catch acronyms and organization names
-  const orgMatches = lex.match(/\b([A-Z]{2,}|[A-Z][a-z]+\s(?:de|du|des)\s[A-Z][a-z]+)\b/g);
+  // Catch acronyms and known organizations
+  const orgMatches = lex.match(/\b(SUVA|SECO|UNESCO|OIT|BIT|BNF|Gallica)\b/g);
   if (orgMatches) {
     orgMatches.forEach(org => properNouns.add(org));
   }
+  // Catch person names (two consecutive capitals)
+  const nameMatches = lex.match(/\b([A-Z][a-z]+\s[A-Z][a-z]+)\b/g);
+  if (nameMatches) {
+    nameMatches.forEach(name => properNouns.add(name));
+  }
+
   if (properNouns.size > 0) {
     const items = Array.from(properNouns).map(name => ({
       text: name,
@@ -836,6 +848,15 @@ function showReferences(label, lex) {
     refs.push({ type: 'context', icon: '📝', title: 'Contexte clé', items: keyContexts });
   }
 
+  // Add sources section
+  if (sources.length > 0) {
+    const sourceItems = sources.map(source => ({
+      text: source,
+      url: REFERENCE_LINKS[source] || null
+    }));
+    refs.push({ type: 'sources', icon: '📌', title: 'Sources confirmées', items: sourceItems });
+  }
+
   // Extract URLs if any
   const urls = [];
   const urlMatch = lex.match(/https?:\/\/[^\s)]+/gi);
@@ -845,33 +866,36 @@ function showReferences(label, lex) {
     });
   }
   if (urls.length > 0) {
-    refs.push({ type: 'urls', icon: '🔗', title: 'Ressources', items: urls });
+    refs.push({ type: 'urls', icon: '🔗', title: 'Ressources web', items: urls });
   }
 
   // Display in modal
   document.getElementById('ref-title').textContent = `Références — ${label}`;
-  let content = '<div style="text-align:left;">';
+  let content = '<div style="text-align:left;max-height:400px;overflow-y:auto;">';
 
   if (refs.length > 0) {
     refs.forEach(section => {
-      content += `<div style="margin-bottom:18px;">
-        <div style="font-weight:500;color:var(--text);margin-bottom:8px;font-size:12px;">${section.icon} ${section.title}</div>
-        <ul style="margin:0;padding-left:16px;font-size:12px;">`;
+      content += `<div style="margin-bottom:16px;">
+        <div style="font-weight:500;color:var(--text);margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">${section.icon} ${section.title}</div>
+        <ul style="margin:0;padding-left:18px;font-size:11px;line-height:1.6;">`;
       section.items.forEach(item => {
-        if (section.type === 'urls') {
-          content += `<li style="margin-bottom:6px;"><a href="${item}" target="_blank" style="color:var(--accent);text-decoration:underline;word-break:break-all;">${item}</a></li>`;
+        let itemText = typeof item === 'string' ? item : item.text;
+        let itemUrl = typeof item === 'object' ? item.url : null;
+
+        if (itemUrl) {
+          content += `<li style="margin-bottom:5px;"><a href="${itemUrl}" target="_blank" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${itemText}</a></li>`;
         } else if (section.type === 'context') {
-          content += `<li style="margin-bottom:8px;color:var(--muted);line-height:1.5;">"${item}"</li>`;
-        } else if (section.type === 'people' && item.url) {
-          content += `<li style="margin-bottom:6px;"><a href="${item.url}" target="_blank" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${item.text}</a></li>`;
+          content += `<li style="margin-bottom:8px;color:var(--muted);line-height:1.6;font-style:italic;">"${itemText}"</li>`;
+        } else if (section.type === 'urls') {
+          content += `<li style="margin-bottom:5px;"><a href="${itemText}" target="_blank" style="color:var(--accent);text-decoration:underline;word-break:break-all;">${itemText}</a></li>`;
         } else {
-          content += `<li style="margin-bottom:6px;">${item.text || item}</li>`;
+          content += `<li style="margin-bottom:5px;">${itemText}</li>`;
         }
       });
       content += '</ul></div>';
     });
   } else {
-    content += '<p style="color:var(--muted);font-size:13px;">Aucune référence trouvée.</p>';
+    content += '<p style="color:var(--muted);font-size:12px;">Aucune référence trouvée.</p>';
   }
   content += '</div>';
 
