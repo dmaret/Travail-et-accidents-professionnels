@@ -780,6 +780,18 @@ function closeModal(e) {
   if (!e || e.target.id === 'modal-references') document.getElementById('modal-references').classList.remove('open');
 }
 
+// Reference links for organizations and people
+const REFERENCE_LINKS = {
+  'SUVA': 'https://www.suva.ch',
+  'Robert Castel': 'https://fr.wikipedia.org/wiki/Robert_Castel',
+  'Castel': 'https://fr.wikipedia.org/wiki/Robert_Castel',
+  'histoiredelasecuritesociale.ch': 'https://histoiredelasecuritesociale.ch',
+  'SECO': 'https://www.seco.admin.ch',
+  'Fehlmann': 'https://fr.wikipedia.org/wiki/Fehlmann',
+  'Assiette au Beurre': 'https://gallica.bnf.fr/ark:/12148/cb327033728/date1907',
+  'L\'Assiette au Beurre': 'https://gallica.bnf.fr/ark:/12148/cb327033728/date1907'
+};
+
 function showReferences(label, lex) {
   const refs = [];
 
@@ -804,7 +816,11 @@ function showReferences(label, lex) {
     orgMatches.forEach(org => properNouns.add(org));
   }
   if (properNouns.size > 0) {
-    refs.push({ type: 'people', icon: '👥', title: 'Acteurs & institutions', items: Array.from(properNouns) });
+    const items = Array.from(properNouns).map(name => ({
+      text: name,
+      url: REFERENCE_LINKS[name] || null
+    }));
+    refs.push({ type: 'people', icon: '👥', title: 'Acteurs & institutions', items: items });
   }
 
   // Extract contextual sentences (sentences with key info: years, proper nouns, quotes)
@@ -846,8 +862,10 @@ function showReferences(label, lex) {
           content += `<li style="margin-bottom:6px;"><a href="${item}" target="_blank" style="color:var(--accent);text-decoration:underline;word-break:break-all;">${item}</a></li>`;
         } else if (section.type === 'context') {
           content += `<li style="margin-bottom:8px;color:var(--muted);line-height:1.5;">"${item}"</li>`;
+        } else if (section.type === 'people' && item.url) {
+          content += `<li style="margin-bottom:6px;"><a href="${item.url}" target="_blank" style="color:var(--accent);text-decoration:underline;cursor:pointer;">${item.text}</a></li>`;
         } else {
-          content += `<li style="margin-bottom:6px;">${item}</li>`;
+          content += `<li style="margin-bottom:6px;">${item.text || item}</li>`;
         }
       });
       content += '</ul></div>';
