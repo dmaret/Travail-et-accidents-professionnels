@@ -133,6 +133,8 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
 .quiz-card{background:var(--surface);border-radius:20px;padding:36px;width:100%;max-width:540px;margin:16px;box-shadow:0 24px 64px rgba(0,0,0,.22);animation:quizIn .28s cubic-bezier(.34,1.56,.64,1);}
 @keyframes quizIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 .quiz-head{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+.quiz-nav-btn{background:none;border:none;font-size:14px;cursor:pointer;color:var(--accent);font-weight:bold;padding:4px 8px;border-radius:4px;transition:background .2s;}
+.quiz-nav-btn:hover{background:var(--accent-l);}
 .quiz-counter{font-size:11px;color:var(--muted);white-space:nowrap;}
 .quiz-progress-bar{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
 .quiz-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;}
@@ -463,8 +465,10 @@ function renderQuizCard() {
   const pct = (quizIndex / quizQueue.length * 100).toFixed(0);
   inner.innerHTML =
     '<div class="quiz-head">' +
+      (quizIndex > 0 ? '<button class="quiz-nav-btn" onclick="quizPrev()">◀</button>' : '<div style="width:24px;"></div>') +
       '<span class="quiz-counter">' + (quizIndex + 1) + ' / ' + quizQueue.length + '</span>' +
       '<div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:' + pct + '%"></div></div>' +
+      (quizIndex < quizQueue.length - 1 ? '<button class="quiz-nav-btn" onclick="quizNext()">▶</button>' : '<div style="width:24px;"></div>') +
       '<button class="quiz-close-btn" onclick="closeQuiz()">Fermer</button>' +
     '</div>' +
     '<div class="quiz-theme-label">' + q.theme + '</div>' +
@@ -493,6 +497,20 @@ function quizMarkMastered() {
 function quizSkip() {
   quizIndex++;
   renderQuizCard();
+}
+
+function quizPrev() {
+  if (quizIndex > 0) {
+    quizIndex--;
+    renderQuizCard();
+  }
+}
+
+function quizNext() {
+  if (quizIndex < quizQueue.length - 1) {
+    quizIndex++;
+    renderQuizCard();
+  }
 }
 
 function closeQuiz() {
