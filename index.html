@@ -220,7 +220,7 @@ const COLORS=[
 const DEFAULT = {
   heroTitle:'Travail et accidents professionnels',
   heroDesc:"Le travail est, selon Robert Castel (1991), le premier pilier de l'intégration sociale. Lorsqu'un accident du travail ou une maladie professionnelle survient, il ne s'agit pas d'un simple incident individuel : c'est un phénomène social observable qui, une fois nommé et reconnu collectivement, devient un problème social appelant des réponses sociales — lois, dispositifs, institutions. Ce schéma en trois temps structure la dynamique de toute politique sociale, inspiré de Fehlmann et al.",
-  quizEnabled:false,
+  quizEnabled:true,
   themes:[
     {title:'Phénomène social',open:false,items:[
       {
@@ -579,7 +579,7 @@ function buildCard(theme, ti, grid) {
   const sl = document.createElement('div');
   sl.className = 'sub-list';
   (theme.items || []).forEach((item, ii) => {
-    if (!state.quizEnabled) {
+    if (state.quizEnabled) {
       buildSubItem(item, ti, ii, sl, c);
     }
   });
