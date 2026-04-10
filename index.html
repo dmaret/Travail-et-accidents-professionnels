@@ -781,37 +781,77 @@ function closeModal(e) {
 }
 
 function showReferences(label, lex) {
-  // Extract references from lex text
   const refs = [];
-  const sourceMatch = lex.match(/\(Source\s*:\s*([^)]+)\)/gi);
-  if (sourceMatch) {
-    sourceMatch.forEach(match => {
-      const source = match.replace(/\(Source\s*:\s*|[)]/gi, '').trim();
-      if (source && !refs.includes(source)) refs.push(source);
-    });
+
+  // Extract dates/years (4 digits)
+  const dateMatches = lex.match(/\b(19|20)\d{2}\b/g);
+  if (dateMatches) {
+    const dates = [...new Set(dateMatches)].sort();
+    refs.push({ type: 'dates', icon: '📅', title: 'Périodes citées', items: dates });
   }
 
-  // Also extract URLs if any
+  // Extract proper nouns and organizations (capitalized words, excluding first word)
+  const words = lex.split(/[\s,.:;()]+/).filter(w => w.length > 2);
+  const properNouns = new Set();
+  words.forEach(word => {
+    if (/^[A-Z][a-z]+(\s[A-Z][a-z]+)*$/.test(word) && !['Le', 'La', 'Les', 'Un', 'Une', 'Des'].includes(word)) {
+      properNouns.add(word);
+    }
+  });
+  // Also catch acronyms and organization names
+  const orgMatches = lex.match(/\b([A-Z]{2,}|[A-Z][a-z]+\s(?:de|du|des)\s[A-Z][a-z]+)\b/g);
+  if (orgMatches) {
+    orgMatches.forEach(org => properNouns.add(org));
+  }
+  if (properNouns.size > 0) {
+    refs.push({ type: 'people', icon: '👥', title: 'Acteurs & institutions', items: Array.from(properNouns) });
+  }
+
+  // Extract contextual sentences (sentences with key info: years, proper nouns, quotes)
+  const sentences = lex.match(/[^.!?]+[.!?]+/g) || [];
+  const keyContexts = sentences.filter(s => {
+    const hasYear = /\d{4}/.test(s);
+    const hasOrgName = Array.from(properNouns).some(p => s.includes(p));
+    const hasQuote = /[«"]/.test(s);
+    return hasYear || hasOrgName || hasQuote;
+  }).map(s => s.trim());
+
+  if (keyContexts.length > 0) {
+    refs.push({ type: 'context', icon: '📝', title: 'Contexte clé', items: keyContexts });
+  }
+
+  // Extract URLs if any
+  const urls = [];
   const urlMatch = lex.match(/https?:\/\/[^\s)]+/gi);
   if (urlMatch) {
     urlMatch.forEach(url => {
-      if (!refs.includes(url)) refs.push(url);
+      if (!urls.includes(url)) urls.push(url);
     });
+  }
+  if (urls.length > 0) {
+    refs.push({ type: 'urls', icon: '🔗', title: 'Ressources', items: urls });
   }
 
   // Display in modal
   document.getElementById('ref-title').textContent = `Références — ${label}`;
   let content = '<div style="text-align:left;">';
+
   if (refs.length > 0) {
-    content += '<ul style="margin:0;padding-left:20px;">';
-    refs.forEach(ref => {
-      if (ref.match(/^https?:\/\//i)) {
-        content += `<li style="margin-bottom:8px;"><a href="${ref}" target="_blank" style="color:var(--accent);text-decoration:underline;">${ref}</a></li>`;
-      } else {
-        content += `<li style="margin-bottom:8px;">${ref}</li>`;
-      }
+    refs.forEach(section => {
+      content += `<div style="margin-bottom:18px;">
+        <div style="font-weight:500;color:var(--text);margin-bottom:8px;font-size:12px;">${section.icon} ${section.title}</div>
+        <ul style="margin:0;padding-left:16px;font-size:12px;">`;
+      section.items.forEach(item => {
+        if (section.type === 'urls') {
+          content += `<li style="margin-bottom:6px;"><a href="${item}" target="_blank" style="color:var(--accent);text-decoration:underline;word-break:break-all;">${item}</a></li>`;
+        } else if (section.type === 'context') {
+          content += `<li style="margin-bottom:8px;color:var(--muted);line-height:1.5;">"${item}"</li>`;
+        } else {
+          content += `<li style="margin-bottom:6px;">${item}</li>`;
+        }
+      });
+      content += '</ul></div>';
     });
-    content += '</ul>';
   } else {
     content += '<p style="color:var(--muted);font-size:13px;">Aucune référence trouvée.</p>';
   }
