@@ -175,6 +175,7 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
     <button class="btn" id="quiz-btn" onclick="openQuiz()" disabled>⚡ Quiz</button>
     <button class="btn primary" onclick="openAddTheme()">+ Nouveau thème</button>
     <button class="btn" onclick="window.print()">Exporter PDF</button>
+    <button class="btn" onclick="resetProgress()">🔄 Réinitialiser progression</button>
     <button class="btn danger" onclick="clearAll()">Réinitialiser</button>
   </div>
   <div class="global-progress-wrap">
@@ -703,6 +704,20 @@ function confirmAddTheme() {
 
 function closeModal(e) {
   if (e.target.id === 'modal-add') document.getElementById('modal-add').classList.remove('open');
+}
+
+function resetProgress() {
+  const btn = document.querySelector('button[onclick="resetProgress()"]');
+  showConfirm(btn, "Réinitialiser toute la progression ?", () => {
+    state.themes.forEach(t => {
+      (t.items || []).forEach(item => {
+        item.mastered = false;
+      });
+    });
+    save();
+    render();
+    renderGlobalProgress();
+  });
 }
 
 function clearAll() {
