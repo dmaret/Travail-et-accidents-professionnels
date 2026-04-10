@@ -156,6 +156,11 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
 .lex-body{transition:max-height .28s cubic-bezier(.4,0,.2,1) !important;}
 .sub-item{transition:opacity .2s ease;}
 
+/* ---- Quiz disabled styles ---- */
+.container.quiz-disabled .global-progress-wrap{display:none !important;}
+.container.quiz-disabled .card-progress-text{display:none !important;}
+.container.quiz-disabled .mastered-btn{display:none !important;}
+
 </style>
 </head>
 <body>
@@ -520,6 +525,12 @@ function save() {
 }
 
 function render() {
+  const container = document.querySelector('.container');
+  if (!state.quizEnabled) {
+    container.classList.add('quiz-disabled');
+  } else {
+    container.classList.remove('quiz-disabled');
+  }
   document.getElementById('hero-title').innerText = state.heroTitle;
   document.getElementById('hero-desc').innerText = state.heroDesc;
   const row = document.getElementById('schema-row');
@@ -736,6 +747,12 @@ function initQuizToggle() {
   if (checkbox && btn) {
     checkbox.checked = state.quizEnabled;
     btn.disabled = !state.quizEnabled;
+  }
+  const container = document.querySelector('.container');
+  if (!state.quizEnabled) {
+    container.classList.add('quiz-disabled');
+  } else {
+    container.classList.remove('quiz-disabled');
   }
 }
 
