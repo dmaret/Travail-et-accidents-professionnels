@@ -208,6 +208,16 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-references" onclick="if(event.target.id==='modal-references')closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="ref-title">Références</h3>
+    <div id="ref-content"></div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-quiz-theme" onclick="if(event.target.id==='modal-quiz-theme')closeModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <h3>Choisir un thème</h3>
@@ -675,6 +685,7 @@ function buildSubItem(item, ti, ii, container, c) {
     <span class="sub-label" contenteditable="true" spellcheck="false">${item.label}</span>
     <div class="sub-item-btns">
       <div class="mastered-btn" title="${item.mastered ? 'Marquer à revoir' : 'Marquer comme maîtrisé'}">✓</div>
+      <div class="ref-btn" title="Voir les références" style="cursor:pointer;">📚</div>
       <div class="lex-btn">${item.lexOpen ? '−' : '+'}</div>
       <div class="del-sub-btn">✕</div>
     </div>
@@ -696,6 +707,10 @@ function buildSubItem(item, ti, ii, container, c) {
     e.target.title = isMastered ? 'Marquer à revoir' : 'Marquer comme maîtrisé';
     renderGlobalProgress();
     updateCardProgress(ti);
+  });
+  hdr.querySelector('.ref-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showReferences(item.label, item.lex);
   });
   hdr.querySelector('.del-sub-btn').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -755,6 +770,48 @@ function confirmAddTheme() {
 function closeModal(e) {
   if (!e || e.target.id === 'modal-add') document.getElementById('modal-add').classList.remove('open');
   if (!e || e.target.id === 'modal-quiz-theme') document.getElementById('modal-quiz-theme').classList.remove('open');
+  if (!e || e.target.id === 'modal-references') document.getElementById('modal-references').classList.remove('open');
+}
+
+function showReferences(label, lex) {
+  // Extract references from lex text
+  const refs = [];
+  const sourceMatch = lex.match(/\(Source\s*:\s*([^)]+)\)/gi);
+  if (sourceMatch) {
+    sourceMatch.forEach(match => {
+      const source = match.replace(/\(Source\s*:\s*|[)]/gi, '').trim();
+      if (source && !refs.includes(source)) refs.push(source);
+    });
+  }
+
+  // Also extract URLs if any
+  const urlMatch = lex.match(/https?:\/\/[^\s)]+/gi);
+  if (urlMatch) {
+    urlMatch.forEach(url => {
+      if (!refs.includes(url)) refs.push(url);
+    });
+  }
+
+  // Display in modal
+  document.getElementById('ref-title').textContent = `Références — ${label}`;
+  let content = '<div style="text-align:left;">';
+  if (refs.length > 0) {
+    content += '<ul style="margin:0;padding-left:20px;">';
+    refs.forEach(ref => {
+      if (ref.match(/^https?:\/\//i)) {
+        content += `<li style="margin-bottom:8px;"><a href="${ref}" target="_blank" style="color:var(--accent);text-decoration:underline;">${ref}</a></li>`;
+      } else {
+        content += `<li style="margin-bottom:8px;">${ref}</li>`;
+      }
+    });
+    content += '</ul>';
+  } else {
+    content += '<p style="color:var(--muted);font-size:13px;">Aucune référence trouvée.</p>';
+  }
+  content += '</div>';
+
+  document.getElementById('ref-content').innerHTML = content;
+  document.getElementById('modal-references').classList.add('open');
 }
 
 function resetProgress() {
