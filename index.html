@@ -22,6 +22,13 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
 .btn.primary:hover{background:#235030;}
 .btn.danger{color:var(--danger);border-color:var(--danger-l);}
 .btn.danger:hover{background:var(--danger-l);}
+/* ---- Quiz Toggle ---- */
+.quiz-toggle{display:inline-flex;align-items:center;cursor:pointer;margin:0 4px;}
+.quiz-toggle input{display:none;}
+.toggle-switch{display:inline-block;width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;transition:background .2s;}
+.toggle-switch::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;}
+.quiz-toggle input:checked~.toggle-switch{background:var(--accent);}
+.quiz-toggle input:checked~.toggle-switch::after{left:18px;}
 .hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:28px;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;top:0;left:0;width:5px;height:100%;background:var(--accent);border-radius:16px 0 0 16px;}
 .hero-label{font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
@@ -157,7 +164,11 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
   <div class="toolbar">
     <div class="toolbar-title">Lexique de cours</div>
     <input type="text" id="search-input" class="search-input" placeholder="Rechercher..." oninput="filterItems(this.value)">
-    <button class="btn" onclick="openQuiz()">⚡ Quiz</button>
+    <label class="quiz-toggle">
+      <input type="checkbox" id="quiz-toggle-checkbox" onchange="toggleQuiz()" />
+      <span class="toggle-switch"></span>
+    </label>
+    <button class="btn" id="quiz-btn" onclick="openQuiz()" disabled>⚡ Quiz</button>
     <button class="btn primary" onclick="openAddTheme()">+ Nouveau thème</button>
     <button class="btn" onclick="window.print()">Exporter PDF</button>
     <button class="btn danger" onclick="clearAll()">Réinitialiser</button>
@@ -209,6 +220,7 @@ const COLORS=[
 const DEFAULT = {
   heroTitle:'Travail et accidents professionnels',
   heroDesc:"Le travail est, selon Robert Castel (1991), le premier pilier de l'intégration sociale. Lorsqu'un accident du travail ou une maladie professionnelle survient, il ne s'agit pas d'un simple incident individuel : c'est un phénomène social observable qui, une fois nommé et reconnu collectivement, devient un problème social appelant des réponses sociales — lois, dispositifs, institutions. Ce schéma en trois temps structure la dynamique de toute politique sociale, inspiré de Fehlmann et al.",
+  quizEnabled:false,
   themes:[
     {title:'Phénomène social',open:false,items:[
       {
@@ -408,7 +420,15 @@ function updateCardProgress(ti) {
 let quizQueue = [];
 let quizIndex = 0;
 
+function toggleQuiz() {
+  state.quizEnabled = !state.quizEnabled;
+  document.getElementById('quiz-btn').disabled = !state.quizEnabled;
+  save();
+  render();
+}
+
 function openQuiz() {
+  if (!state.quizEnabled) return;
   quizQueue = [];
   state.themes.forEach((theme, ti) => {
     (theme.items || []).forEach((item, ii) => {
@@ -491,6 +511,7 @@ function loadState() {
       });
     } catch(e) {}
   }
+  if (state.quizEnabled === undefined) state.quizEnabled = false;
   render();
 }
 
@@ -709,7 +730,17 @@ function showConfirm(anchor, message, onYes) {
   }), 10);
 }
 
+function initQuizToggle() {
+  const checkbox = document.getElementById('quiz-toggle-checkbox');
+  const btn = document.getElementById('quiz-btn');
+  if (checkbox && btn) {
+    checkbox.checked = state.quizEnabled;
+    btn.disabled = !state.quizEnabled;
+  }
+}
+
 loadState();
+initQuizToggle();
 </script>
 <div class="toast-container" id="toast-container"></div>
 <!-- Legal notice and copyright -->
