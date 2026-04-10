@@ -579,7 +579,7 @@ function buildCard(theme, ti, grid) {
   const sl = document.createElement('div');
   sl.className = 'sub-list';
   (theme.items || []).forEach((item, ii) => {
-    if (state.quizEnabled) {
+    if (!state.quizEnabled) {
       buildSubItem(item, ti, ii, sl, c);
     }
   });
