@@ -578,7 +578,11 @@ function buildCard(theme, ti, grid) {
   body.className = 'card-body';
   const sl = document.createElement('div');
   sl.className = 'sub-list';
-  (theme.items || []).forEach((item, ii) => buildSubItem(item, ti, ii, sl, c));
+  (theme.items || []).forEach((item, ii) => {
+    if (state.quizEnabled) {
+      buildSubItem(item, ti, ii, sl, c);
+    }
+  });
   const addRow = document.createElement('div');
   addRow.className = 'add-item-row';
   addRow.innerHTML = `<input class="add-item-input" placeholder="Nouveau sous-item..." id="ni-${ti}"><button class="add-item-btn">Ajouter</button>`;
@@ -591,7 +595,7 @@ function buildCard(theme, ti, grid) {
 
 function buildSubItem(item, ti, ii, container, c) {
   const div = document.createElement('div');
-  div.className = 'sub-item' + (item.lexOpen ? ' lex-open' : '') + (item.mastered ? ' mastered' : '') + (!state.quizEnabled ? ' hidden' : '');
+  div.className = 'sub-item' + (item.lexOpen ? ' lex-open' : '') + (item.mastered ? ' mastered' : '');
   div.setAttribute('data-ti', ti);
   div.setAttribute('data-ii', ii);
   const hdr = document.createElement('div');
