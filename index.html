@@ -124,6 +124,7 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
 /* ---- Search filter ---- */
 .sub-item.hidden{display:none;}
 .sub-item.quiz-disabled .sub-item-btns{display:none !important;}
+.container.quiz-disabled .global-progress-wrap{display:none !important;}
 .card.search-hidden{display:none;}
 
 /* ---- Quiz overlay ---- */
@@ -521,6 +522,7 @@ function save() {
 }
 
 function render() {
+  document.querySelector('.container').classList.toggle('quiz-disabled', !state.quizEnabled);
   document.getElementById('hero-title').innerText = state.heroTitle;
   document.getElementById('hero-desc').innerText = state.heroDesc;
   const row = document.getElementById('schema-row');
