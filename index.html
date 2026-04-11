@@ -207,8 +207,30 @@ body{font-family:'DM Sans',sans-serif;background-color:var(--bg);background-imag
   Image de fond — <em>L'Assiette au Beurre</em>, n° 303, 10 février 1907. "Les métiers qui tuent". <a href="https://gallica.bnf.fr/ark:/12148/cb327033728/date1907" target="_blank" style="color:inherit;text-decoration:underline;">Gallica (BNF)</a>
 </div>
 
-<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);opacity:0.5;text-align:center;">
-  © 2025–2026 <strong>dmaret™</strong> — Tous droits réservés
+<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);opacity:0.5;text-align:center;cursor:pointer;" onclick="document.getElementById('modal-legal').classList.add('open')">
+  © 2025–2026 <strong>dmaret™</strong> — <u>Tous droits réservés</u>
+</div>
+
+<div class="modal-overlay" id="modal-legal" onclick="if(event.target.id==='modal-legal')this.classList.remove('open')" style="display:none;">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:70vh;overflow-y:auto;font-size:11px;line-height:1.6;">
+    <h3 style="font-size:14px;margin-bottom:12px;">Conditions d'utilisation</h3>
+    <div style="color:var(--text);">
+      <p style="margin-bottom:8px;"><strong>© 2025–2026 MARET Davie — Tous droits réservés</strong></p>
+
+      <p style="margin-bottom:8px;font-weight:500;margin-top:12px;">Conditions d'utilisation du code :</p>
+      <ul style="margin:8px 0;padding-left:16px;color:var(--muted);">
+        <li>Le code source de ces projets est fourni à titre informatif et éducatif</li>
+        <li>Toute reproduction, modification ou redistribution du code sans autorisation écrite est strictement interdite</li>
+        <li>Les designs, interfaces visuelles et contenus créatifs sont protégés par le droit d'auteur</li>
+        <li>Pour toute demande de réutilisation ou de collaboration, contactez l'auteur</li>
+      </ul>
+
+      <p style="margin-top:12px;margin-bottom:8px;"><strong>Attribution :</strong> <span style="color:var(--muted);">Si vous utilisez ou vous inspirez de ces projets, veuillez citer la source : dmaret™ © 2025–2026</span></p>
+    </div>
+    <div class="modal-btns" style="margin-top:16px;">
+      <button class="btn" onclick="document.getElementById('modal-legal').classList.remove('open')" style="width:100%;">Fermer</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modal-add" onclick="closeModal(event)">
